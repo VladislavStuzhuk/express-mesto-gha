@@ -11,15 +11,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   req.user = {
-    _id: '62e7f17b8353f9efee8d0d6c'
+    _id: '62e7f17b8353f9efee8d0d6c',
   };
   next();
 });
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.listen(PORT, () => {
-  console.log("Сервер запущен");
 });
