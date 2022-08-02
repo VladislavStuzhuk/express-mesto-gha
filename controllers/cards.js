@@ -10,10 +10,8 @@ module.exports.createCard = (req, res) => {
       res.send({ data: card });
     })
     .catch((err) => {
-      const ERROR_CODE = 400;
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE)
-          .send({ message: 'Переданы некорректные данные при создании карточки' });
+        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
@@ -30,12 +28,15 @@ module.exports.getCards = (req, res) => {
 };
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
+    .orFail()
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      const ERROR_CODE = 404;
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE)
-          .send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(400).send({ message: 'Указан некорректный id карточки.' });
+      } else if (err.name === 'DocumentNotFoundError') {
+        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -45,12 +46,13 @@ module.exports.removeLike = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail()
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      const ERROR_CODE = 404;
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE)
-          .send({ message: 'Передан несуществующий _id карточки.' });
+        res.status(400).send({ message: 'Указан некорректный id карточки.' });
+      } else if (err.name === 'DocumentNotFoundError') {
+        res.status(404).send({ message: 'Передан несуществующий id карточки.' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
@@ -62,12 +64,13 @@ module.exports.setLike = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail()
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      const ERROR_CODE = 404;
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE)
-          .send({ message: 'Передан несуществующий _id карточки.' });
+        res.status(400).send({ message: 'Указан некорректный id карточки.' });
+      } else if (err.name === 'DocumentNotFoundError') {
+        res.status(404).send({ message: 'Передан несуществующий id карточки.' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
