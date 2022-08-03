@@ -1,5 +1,10 @@
 const Card = require('../models/card');
 
+const ERROR_CODE_VAL = 400;
+const ERROR_CODE_CAST = 400;
+const ERROR_CODE_NOT_FOUND = 404;
+const ERROR_CODE_DEF = 500;
+
 module.exports.createCard = (req, res) => {
   const {
     name, link,
@@ -11,9 +16,9 @@ module.exports.createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
+        res.status(ERROR_CODE_VAL).send({ message: 'Переданы некорректные данные при создании карточки' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -23,7 +28,7 @@ module.exports.getCards = (req, res) => {
     .populate('')
     .then((card) => res.send({ data: card }))
     .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
     });
 };
 module.exports.deleteCard = (req, res) => {
@@ -32,11 +37,11 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Указан некорректный id карточки.' });
+        res.status(ERROR_CODE_CAST).send({ message: 'Указан некорректный id карточки.' });
       } else if (err.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена.' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -50,11 +55,11 @@ module.exports.removeLike = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Указан некорректный id карточки.' });
+        res.status(ERROR_CODE_CAST).send({ message: 'Указан некорректный id карточки.' });
       } else if (err.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Передан несуществующий id карточки.' });
+        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Передан несуществующий id карточки.' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -68,11 +73,11 @@ module.exports.setLike = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Указан некорректный id карточки.' });
+        res.status(ERROR_CODE_CAST).send({ message: 'Указан некорректный id карточки.' });
       } else if (err.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Передан несуществующий id карточки.' });
+        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Передан несуществующий id карточки.' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
       }
     });
 };
