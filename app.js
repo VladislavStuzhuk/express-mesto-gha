@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const auth = require('./middlewares/auth'); 
+const auth = require('./middlewares/auth');
 const errors = require('./middlewares/error');
-const  NotFoundError = require('./errors/not-found-err'); 
+const NotFoundError = require('./errors/not-found-err');
+
 const { PORT = 3000 } = process.env;
 const app = express();
 
@@ -20,10 +21,11 @@ app.post('/signup', createUser);
 app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+
 app.use((req, res, next) => {
   next(new NotFoundError('Некорректный запрос'));
 });
 
-app.use(errors); 
+app.use(errors);
 app.listen(PORT, () => {
 });

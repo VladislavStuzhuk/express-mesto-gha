@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const NotFoundError = require('../errors/not-found-err'); 
+const NotFoundError = require('../errors/not-found-err');
 const CastError = require('../errors/cast-err');
 const AccesError = require('../errors/acces-err');
 const ValidationError = require('../errors/validation-err');
@@ -13,10 +13,10 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => {
       res.send({ data: card });
     })
-    .catch((err) => { 
+    .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные при создании карточки'))
-      } 
+        next(new ValidationError('Переданы некорректные данные при создании карточки'));
+      }
       next(err);
     });
 };
@@ -25,21 +25,21 @@ module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('')
     .then((card) => res.send({ data: card }))
-    .catch(err => next(err));
+    .catch((err) => next(err));
 };
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .orFail(new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      if (card.owner._id == req.user._id) {
+      if (card.owner.equals(req.user._id)) {
         res.send({ data: card });
-        return Card.findByIdAndRemove(req.params.cardId)   
+        return Card.findByIdAndRemove(req.params.cardId);
       }
-      throw new AccesError('Ошибка доступа')
+      throw new AccesError('Ошибка доступа');
     })
-    .catch(err =>{
+    .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id карточки.'))
+        next(new CastError('Указан некорректный id карточки.'));
       }
       next(err);
     });
@@ -52,9 +52,9 @@ module.exports.removeLike = (req, res, next) => {
   )
     .orFail(new NotFoundError('Карточка не найдена'))
     .then((card) => res.send({ data: card }))
-    .catch(err =>{
+    .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id карточки.'))
+        next(new CastError('Указан некорректный id карточки.'));
       }
       next(err);
     });
@@ -66,10 +66,10 @@ module.exports.setLike = (req, res, next) => {
     { new: true },
   )
     .orFail(new NotFoundError('Карточка не найдена'))
-    .then((card, err) => res.send({ data: card }))
-    .catch(err =>{
+    .then((card) => res.send({ data: card }))
+    .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id карточки.'))
+        next(new CastError('Указан некорректный id карточки.'));
       }
       next(err);
     });
