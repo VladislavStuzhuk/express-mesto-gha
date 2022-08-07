@@ -1,83 +1,89 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken'); 
 const User = require('../models/user');
+const NotFoundError = require('../errors/not-found-err'); 
+const CastError = require('../errors/cast-err');
+const ValidationError = require('../errors/validation-err');
+const RegisterError = require('../errors/register-err');
 
-const ERROR_CODE_VAL = 400;
-const ERROR_CODE_CAST = 400;
-const ERROR_CODE_NOT_FOUND = 404;
-const ERROR_CODE_DEF = 500;
+module.exports.login = (req, res, next) => {
+  const {email, password} = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => {
-      res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      next(err);
     });
 };
-module.exports.getUserById = (req, res) => {
-  User.findById(req.params.userId)
-    .orFail()
+module.exports.getUserById = (req, res, next) => {
+  User.findById(req.user._id)
+    .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => {
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_CAST).send({ message: 'Указан некорректный id.' });
-      } else if (err.name === 'DocumentNotFoundError') {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден.' });
-      } else {
-        res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
-      }
+        next(new CastError('Указан некорректный id'))
+      } 
+      next(err);
     });
 };
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
-    name, about, avatar,
+    name, about, avatar, email, password
   } = req.body;
-  User.create({ name, about, avatar })
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({ name, about, avatar, email, password: hash,
+    }))
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_VAL)
-          .send({ message: 'Переданы некорректные данные при создании пользователя.' });
-      } else {
-        res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
-      }
+    .catch((err) => { 
+      if (err.name === 'MongoServerError'){
+        next(new RegisterError('Пользователь с данным e-mail уже зарегестрирован.'))
+      } else if (err.name === 'ValidationError') {
+        next(new ValidationError(err.message))
+      } 
+      next(err);
     });
 };
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const {
     name, about,
   } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail()
+    .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_CAST).send({ message: 'Указан некорректный id.' });
-      } else if (err.name === 'DocumentNotFoundError') {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Пользователь с указанным id не найден.' });
+        next(new CastError('Указан некорректный id'))
       } else if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_VAL).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
-      } else {
-        res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
-      }
+        next(new ValidationError('Переданы некорректные данные при обновлении профиля.'))
+      } 
+      next(err);
     });
 };
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const {
     avatar,
   } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail()
+    .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_CAST).send({ message: 'Указан некорректный id.' });
-      } else if (err.name === 'DocumentNotFoundError') {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Пользователь с указанным id не найден.' });
+        next(new CastError('Указан некорректный id'))
       } else if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_VAL).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
-      } else {
-        res.status(ERROR_CODE_DEF).send({ message: 'Произошла ошибка' });
-      }
+        next(new ValidationError('Переданы некорректные данные при обновлении аватара.'))
+      } 
+      next(err);
     });
 };
