@@ -1,6 +1,5 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/not-found-err');
-const CastError = require('../errors/cast-err');
 const AccesError = require('../errors/acces-err');
 const ValidationError = require('../errors/validation-err');
 
@@ -16,8 +15,7 @@ module.exports.createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при создании карточки'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 
@@ -39,9 +37,8 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id карточки.'));
-      }
-      next(err);
+        next(new ValidationError('Указан некорректный id карточки.'));
+      } else next(err);
     });
 };
 module.exports.removeLike = (req, res, next) => {
@@ -54,9 +51,8 @@ module.exports.removeLike = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id карточки.'));
-      }
-      next(err);
+        next(new ValidationError('Указан некорректный id карточки.'));
+      } else next(err);
     });
 };
 module.exports.setLike = (req, res, next) => {
@@ -69,8 +65,7 @@ module.exports.setLike = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id карточки.'));
-      }
-      next(err);
+        next(new ValidationError('Указан некорректный id карточки.'));
+      } else next(err);
     });
 };

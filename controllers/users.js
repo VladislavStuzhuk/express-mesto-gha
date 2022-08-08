@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
-const CastError = require('../errors/cast-err');
 const ValidationError = require('../errors/validation-err');
 const RegisterError = require('../errors/register-err');
 
@@ -26,16 +25,15 @@ module.exports.getUsers = (req, res, next) => {
     });
 };
 module.exports.getUserById = (req, res, next) => {
-  User.findById(req.user._id)
+  User.findById(req.params.userId || req.user._id)
     .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => {
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id'));
-      }
-      next(err);
+        next(new ValidationError('Указан некорректный id'));
+      } else next(err);
     });
 };
 module.exports.createUser = (req, res, next) => {
@@ -46,14 +44,17 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({ data: user }))
+    .then(() => res.send({
+      data: {
+        name, about, avatar, email,
+      },
+    }))
     .catch((err) => {
-      if (err.name === 'MongoServerError') {
+      if (err.code === 11000) {
         next(new RegisterError('Пользователь с данным e-mail уже зарегестрирован.'));
       } else if (err.name === 'ValidationError') {
         next(new ValidationError(err.message));
-      }
-      next(err);
+      } else next(err);
     });
 };
 module.exports.updateUser = (req, res, next) => {
@@ -64,12 +65,9 @@ module.exports.updateUser = (req, res, next) => {
     .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id'));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при обновлении профиля.'));
-      }
-      next(err);
+      } else next(err);
     });
 };
 module.exports.updateAvatar = (req, res, next) => {
@@ -80,11 +78,8 @@ module.exports.updateAvatar = (req, res, next) => {
     .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new CastError('Указан некорректный id'));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при обновлении аватара.'));
-      }
-      next(err);
+      } else next(err);
     });
 };

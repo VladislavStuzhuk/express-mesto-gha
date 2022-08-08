@@ -22,6 +22,10 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => /^https?:\/\/(www\.)?[a-zA-Z\d]+\.[\w\-._~:/?#[\]@!$&'()*+,;=]{2,}#?$/g.test(v),
+      message: 'Некорректная ссылка',
+    },
   },
   createdAt: {
     type: Date,
