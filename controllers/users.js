@@ -24,8 +24,20 @@ module.exports.getUsers = (req, res, next) => {
       next(err);
     });
 };
+module.exports.getMyProfile = (req, res, next) => {
+  User.findById(req.user._id)
+    .orFail(new NotFoundError('Пользователь не найден'))
+    .then((user) => {
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new ValidationError('Указан некорректный id'));
+      } else next(err);
+    });
+};
 module.exports.getUserById = (req, res, next) => {
-  User.findById(req.params.userId || req.user._id)
+  User.findById(req.params.userId)
     .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => {
       res.send({ data: user });
