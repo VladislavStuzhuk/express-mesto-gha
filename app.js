@@ -18,9 +18,9 @@ const {
 mongoose.connect('mongodb://localhost:27017/mestodb');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({
-  Origin: 'https://vlad.talant.nomoredomains.sbs',
-}));
+
+app.use(cors());
+app.options('*', cors());
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
