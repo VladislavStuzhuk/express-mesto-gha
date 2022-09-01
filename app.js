@@ -37,9 +37,8 @@ app.post('/signup', celebrate({
     avatar: Joi.string().regex(/^https?:\/\/(www\.)?[a-zA-Z\d]+\.[\w\-._~:/?#[\]@!$&'()*+,;=]{2,}#?$/),
   }),
 }), createUser);
-app.use(auth);
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
+app.use('/users', auth, require('./routes/users'));
+app.use('/cards', auth, require('./routes/cards'));
 
 app.use((req, res, next) => {
   next(new NotFoundError('Некорректный запрос'));
