@@ -56,6 +56,7 @@ module.exports.removeLike = (req, res, next) => {
     });
 };
 module.exports.setLike = (req, res, next) => {
+  console.log(req.user._id);
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
