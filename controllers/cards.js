@@ -10,7 +10,7 @@ module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => {
-      res.send({ data: card });
+      res.send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -22,7 +22,7 @@ module.exports.createCard = (req, res, next) => {
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('')
-    .then((card) => res.send({ card }))
+    .then((card) => res.send(card))
     .catch((err) => next(err));
 };
 module.exports.deleteCard = (req, res, next) => {
