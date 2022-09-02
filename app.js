@@ -6,6 +6,7 @@ const { errors, celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
 const errorsHandler = require('./middlewares/error');
 const NotFoundError = require('./errors/not-found-err');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -21,6 +22,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors());
 app.options('*', cors());
+app.use(requestLogger);
+
 app.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Сервер сейчас упадёт');
@@ -46,6 +49,7 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
+app.use(errorLogger);
 app.use((req, res, next) => {
   next(new NotFoundError('Некорректный запрос'));
 });
