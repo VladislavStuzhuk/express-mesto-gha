@@ -48,7 +48,7 @@ module.exports.removeLike = (req, res, next) => {
     { new: true },
   )
     .orFail(new NotFoundError('Карточка не найдена'))
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Указан некорректный id карточки.'));
@@ -63,7 +63,7 @@ module.exports.setLike = (req, res, next) => {
     { new: true },
   )
     .orFail(new NotFoundError('Карточка не найдена'))
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Указан некорректный id карточки.'));
