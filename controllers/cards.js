@@ -30,8 +30,8 @@ module.exports.deleteCard = (req, res, next) => {
     .orFail(new NotFoundError('Карточка не найдена'))
     .then((card) => {
       if (card.owner.equals(req.user._id)) {
-        res.send({ data: card });
-        return Card.findByIdAndRemove(req.params.cardId);
+        return Card.findByIdAndRemove(req.params.cardId)
+          .then((i) => res.send({ data: i }));
       }
       throw new AccesError('Ошибка доступа');
     })
