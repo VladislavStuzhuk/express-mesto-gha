@@ -56,5 +56,4 @@ app.use((req, res, next) => {
 app.use(errorLogger);
 app.use(errors());
 app.use(errorsHandler);
-app.listen(PORT, () => {
-});
+app.listen(PORT);
